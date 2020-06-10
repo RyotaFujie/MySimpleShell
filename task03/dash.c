@@ -4,6 +4,9 @@
 #include <stdlib.h>
 #include <unistd.h>
 
+#include <sys/stat.h>
+#include <fcntl.h>
+
 #include <sys/types.h>
 #include <sys/wait.h>
 
@@ -12,7 +15,7 @@
 
 const char whitespace[] = " \t\r\n\v";
 
-int parsecmd(char **argv, char *buf, char *ebuf)
+int parsecmd(char **argv, int *len, char *buf, char *ebuf)
 {
 	char *s;
 	int  i = 0;
@@ -29,15 +32,18 @@ int parsecmd(char **argv, char *buf, char *ebuf)
 		s++;
 	}
 
+	//返り値
+	*len = i;
 	return 1;
 }
 
 void runcmd(char *buf)
 {
 	char *argv[ARGVSIZE];
+	int len;
 		
 	memset(argv, 0, ARGVSIZE);
-	if (parsecmd(argv, buf, &buf[strlen(buf)]) > 0)
+	if (parsecmd(argv, &len, buf, &buf[strlen(buf)]) > 0)
 		if (execvp(argv[0], argv) < 0)
 			perror("execvp");		
 	exit(-1);
